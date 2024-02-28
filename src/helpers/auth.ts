@@ -25,6 +25,18 @@ async function mockSignIn(email: string, password: string): Promise<Record<strin
     });
 }
 
+async function mockSignOut(): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+        setTimeout(() => {
+            if (!localStorage.getItem("user")) {
+                reject(new Error("User not found"));
+            }
+            localStorage.removeItem("user");
+            resolve();
+        }, 500);
+    });
+}
+
 async function mockGetIdToken(): Promise<string> {
     return new Promise<string>((resolve, reject) => {
         setTimeout(() => {
@@ -46,7 +58,7 @@ async function mockGetIdToken(): Promise<string> {
             } else {
                 reject(new Error("User not found"));
             }
-        }, 1500);
+        }, 500);
     });
 }
 
@@ -57,4 +69,4 @@ function mockGetCurrentUser(): Record<string, any> | null {
     return null;
 }
 
-export { mockGetCurrentUser, mockSignIn, mockGetIdToken };
+export { mockGetCurrentUser, mockSignIn, mockSignOut, mockGetIdToken };
