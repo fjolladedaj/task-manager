@@ -10,7 +10,7 @@
             </router-link>
             <div class="bar">
 
-                <h1 class="title">{{ task?.title }}</h1>
+                <h1 class="title">{{ taskTitle }}</h1>
                 <div class="action-btns">
                     <button @click="saveTask()">
                         Save
@@ -21,35 +21,35 @@
         </div>
         <div class="task-form">
             <label for="title">Title:</label>
-            <input type="text" v-model="task.title" id="title">
+            <input type="text" v-model="taskTitle" id="title">
 
             <label for="description">Description:</label>
-            <textarea v-model="task.description" id="description"></textarea>
+            <textarea v-model="taskDescription" id="description"></textarea>
 
             <label for="completeBy">Complete By:</label>
-            <input type="date" v-model="task.completeBy" id="completeBy">
+            <input type="date" v-model="taskCompleteBy" id="completeBy">
 
             <label for="tags">Tags:</label>
             <input type="text" v-model="tagInput.name" placeholder="Tag name" id="tags">
             <input type="color" v-model="tagInput.color" id="tagColor">
             <button @click="addTag">Add Tag</button>
             <ul>
-                <li v-for="(tag, index) in task.tags" :key="index">
+                <li v-for="(tag, index) in taskTags" :key="index">
                     <span :style="{ color: tag.color }">{{ tag.name }}</span>
                     <button @click="removeTag(index)">Remove</button>
                 </li>
             </ul>
 
             <label for="completed">Completed:</label>
-            <input type="checkbox" v-model="task.completed" id="completed">
+            <input type="checkbox" v-model="taskCompleted" id="completed">
         </div>
     </div>
 </template>
-  
+
 <script setup lang="ts">
 import type { TaskTag } from '@/models/task';
 import { useTaskStore } from '@/stores/task';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 const route = useRoute();
@@ -57,6 +57,48 @@ const router = useRouter();
 
 const tasksStore = useTaskStore();
 const task = ref(tasksStore.tasks.find((task) => task.id === Number(route.params.id)));
+const taskToEdit = ref({});
+
+const taskTitle = computed({
+    get: () => {
+        return taskToEdit.value.title;
+    },
+    set: (value) => {
+        taskToEdit.value.title = value;
+    }
+});
+
+const taskDescription = computed({
+    get: () => {
+        return taskToEdit.value.description;
+    },
+    set: (value) => {
+        taskToEdit.value.description = value;
+    }
+});
+
+const taskCompleteBy = computed({
+    get: () => {
+        return taskToEdit.value.completeBy;
+    },
+    set: (value) => {
+        taskToEdit.value.completeBy = value;
+    }
+});
+
+const taskCompleted = computed({
+    get: () => {
+        return taskToEdit.value.completed;
+    },
+    set: (value) => {
+        taskToEdit.value.completed = value;
+    }
+});
+
+const taskTags = computed(() => taskToEdit.value.tags);
+
+const tagInput = ref<TaskTag>({ name: '', color: '#000000' });
+
 
 if (!task.value) {
     // Handle task not found
@@ -64,36 +106,39 @@ if (!task.value) {
     router.push('/tasks');
 }
 
-const tagInput = ref<TaskTag>({ name: '', color: '#000000' });
-
 function addTag() {
-    if (!task.value.tags) {
-        task.value.tags = [];
+    if (!taskToEdit.value.tags) {
+        taskToEdit.value.tags = [];
     }
     if (tagInput.value.name.trim() !== '') {
-        task.value.tags.push({ name: tagInput.value.name, color: tagInput.value.color });
-        tagInput.value = { name: '', color: '#000000' };
+        taskToEdit.value = {
+            ...taskToEdit.value,
+            tags: [...taskToEdit.value.tags, { name: tagInput.value.name, color: tagInput.value.color }]
+        }
+        tagInput.value.name = '';
+        tagInput.value.color = '#000000'
     }
 }
 
 function removeTag(index: number) {
-    if (task.value.tags) {
-        task.value.tags.splice(index, 1);
+    if (taskToEdit.value.tags) {
+        taskToEdit.value.tags.splice(index, 1);
     }
 }
 
 function saveTask() {
-    if (task.value) {
-        tasksStore.updateTask(task.value);
+    if (taskToEdit.value) {
+        tasksStore.updateTask(taskToEdit.value);
         router.push(`/tasks/${task.value.id}`);
     }
 }
 
 onMounted(() => {
     // If editing existing task, fetch task data and assign to task ref
+    taskToEdit.value = JSON.parse(JSON.stringify(task.value));
 });
 </script>
-  
+
 <style scoped>
 .task-form {
     display: flex;
@@ -153,4 +198,3 @@ ul li {
     width: 100%;
 }
 </style>
-  
