@@ -48,6 +48,8 @@
 </template>
 
 <script lang="ts" setup>
+import { computed, ref } from 'vue';
+import type { Task } from '@/models/task';
 import { useTaskStore } from '@/stores/task';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -55,25 +57,27 @@ const route = useRoute();
 const router = useRouter();
 
 const taskStore = useTaskStore();
-const task = taskStore.tasks.find((task) => task.id === Number(route.params.id));
+
+const copiedTask = ref<Task>({});
+
+const task = computed(() => taskStore.tasks.find((task) => task.id === Number(route.params.id)));
 
 function copyTask() {
-    if (!task) return;
-    const newTask = task;
-    newTask.title = `${newTask.title} (Copy)`;
-    const copyTaskId = taskStore.addTask(task);
+    if (!task.value) return;
+    copiedTask.value = { ...task.value, title: `${task.value.title} (Copy)` };
+    const copyTaskId = taskStore.addTask(copiedTask.value);
     router.push(`/tasks/${copyTaskId}`);
 }
 
 function deleteTask() {
-    if (!task) return;
-    taskStore.removeTask(task);
+    if (!task.value) return;
+    taskStore.removeTask(task.value);
     router.push('/tasks');
 }
 
 function editTask() {
-    if (!task) return;
-    router.push(`/tasks/${task.id}/edit`);
+    if (!task.value) return;
+    router.push(`/tasks/${task.value.id}/edit`);
 }
 </script>
 
