@@ -42,7 +42,7 @@
         </div>
     </div>
 </template>
-  
+
 <script setup lang="ts">
 import type { Task } from '@/models/task';
 import { useTaskStore } from '@/stores/task';
@@ -81,7 +81,7 @@ function saveTask() {
     }
 }
 </script>
-  
+
 <style scoped>
 .task-form {
     display: flex;
@@ -131,4 +131,3 @@ function saveTask() {
     width: 100%;
 }
 </style>
-  
