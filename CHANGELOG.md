@@ -1,0 +1,9 @@
+- Reinitialize package-lock.json for accuracy
+- Add authentication, state persistence, input validation, styling, tests and formatting
+- Bug fix 2 - subsequent edits to the copied task will not affect the original task
+- Bug fix 1 - discard changes successfully when editing
+- Install tailwindcss
+- Add mockSignOut function to auth.ts
+- updated README.md
+- initial commit
+- Initial commit
